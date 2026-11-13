@@ -46,3 +46,4 @@ export const GoogleCallbackPage: React.FC = () => {
     </div>
   );
 };
+

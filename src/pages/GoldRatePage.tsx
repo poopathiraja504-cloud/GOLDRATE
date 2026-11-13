@@ -211,3 +211,4 @@ export const GoldRatePage: React.FC = () => {
     </div>
   );
 };
+

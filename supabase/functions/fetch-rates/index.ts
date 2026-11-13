@@ -250,3 +250,4 @@ async function fetchPublicMarketFeeds(): Promise<MarketData> {
     source: "Global Spot Bullion Index (Converted to INR)"
   };
 }
+

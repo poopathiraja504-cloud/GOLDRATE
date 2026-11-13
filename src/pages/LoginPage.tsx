@@ -1,195 +1,212 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Sparkles, Smartphone, ShieldCheck, ArrowRight } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { Mail, Lock, Eye, EyeOff, Coins, AlertCircle } from 'lucide-react'
 
 export const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { signInWithEmail, signInWithGoogle } = useAuth();
-  
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate()
+  const { signInWithGoogle, signInWithEmail } = useAuth()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg('');
-    setIsLoading(true);
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [googleLoading, setGoogleLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
 
+  const handleGoogle = async () => {
+    setError('')
+    setGoogleLoading(true)
     try {
-      const { error } = await signInWithEmail(email, password);
-      if (error) {
-        setErrorMsg(error.message);
+      const { error: authError } = await signInWithGoogle()
+      if (authError) {
+        setError(authError.message || 'Google sign-in failed. Please try again.')
       } else {
-        navigate('/dashboard');
+        navigate('/auth/callback')
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'An error occurred during login');
+    } catch (e) {
+      setError('Google sign-in failed. Please try again.')
     } finally {
-      setIsLoading(false);
+      setGoogleLoading(false)
     }
-  };
+  }
 
-  const handleGoogleLogin = async () => {
-    setErrorMsg('');
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) {
-        setErrorMsg(error.message);
-      } else {
-        navigate('/dashboard');
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Google login failed');
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !password) {
+      setError('Please enter your email and password.')
+      return
     }
-  };
+    setError('')
+    setLoading(true)
+    try {
+      const { error: authError } = await signInWithEmail(email, password)
+      if (authError) {
+        setError(authError.message || 'Sign-in failed. Please check your credentials.')
+      } else {
+        navigate('/dashboard')
+      }
+    } catch (e) {
+      setError('Sign-in failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-2xl border border-amber-500/30 bg-slate-900/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-        
-        {/* Glow */}
-        <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Brand Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 p-0.5 shadow-lg mb-3">
-            <img src="/gold-coin.svg" alt="Gold & Silver Rate" className="w-11 h-11" />
-          </div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Welcome Back</h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Access live bullion rates, personalized portfolio & price alerts.
-          </p>
-        </div>
-
-        {errorMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
-            {errorMsg}
-          </div>
-        )}
-
-        {/* Google OAuth Button */}
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center space-x-3 py-2.5 px-4 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-sm"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span>Continue with Google</span>
-        </button>
-
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-800" />
-          </div>
-          <div className="relative flex justify-center text-[10px] uppercase">
-            <span className="bg-slate-900 px-2 text-slate-500 font-semibold tracking-wider">
-              Or Sign In with Email
-            </span>
-          </div>
-        </div>
-
-        {/* Email/Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5">
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="investor@example.com"
-                className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
-              />
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: '#0a0f1e' }}>
+      <div className="w-full max-w-md">
+        {/* Card */}
+        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8 shadow-2xl">
+          {/* Top: Coin Icon */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full"
+              style={{ backgroundColor: '#d4af3722', border: '2px solid #d4af37' }}>
+              <Coins size={32} style={{ color: '#d4af37' }} />
             </div>
+            <h1 className="text-2xl font-bold" style={{ color: '#d4af37' }}>Welcome Back!</h1>
+            <p className="mt-1 text-sm text-gray-400">Sign in to continue to GOLDSILVERRATE.</p>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-slate-300">Password</label>
-              <Link to="/forgot-password" className="text-[11px] text-amber-400 hover:underline">
-                Forgot password?
+          {/* Error */}
+          {error && (
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* a. Continue with Google */}
+          <button
+            type="button"
+            onClick={handleGoogle}
+            disabled={googleLoading || loading}
+            className="w-full flex items-center justify-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow hover:bg-gray-100 transition-colors disabled:opacity-60 mb-4"
+          >
+            {googleLoading ? (
+              <svg className="animate-spin h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.3 9 3.4l6.7-6.7C35.8 2.5 30.3 0 24 0 14.7 0 6.8 5.4 2.9 13.4l7.8 6.1C12.5 13 17.8 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17z"/>
+                <path fill="#FBBC05" d="M10.7 28.5A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.7-4.5L2.4 13.4A23.9 23.9 0 0 0 0 24c0 3.8.9 7.4 2.5 10.6l8.2-6.1z"/>
+                <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.2 0-11.5-4.2-13.3-9.9l-8.2 6.1C6.8 42.6 14.7 48 24 48z"/>
+                <path fill="none" d="M0 0h48v48H0z"/>
+              </svg>
+            )}
+            Continue with Google
+          </button>
+
+          {/* b. OR Divider */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-xs text-gray-500 font-medium">OR</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
+          <form onSubmit={handleEmailSignIn} className="space-y-4">
+            {/* c. Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="w-full rounded-xl pl-9 pr-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 transition-all"
+                  style={{
+                    backgroundColor: '#0d1424',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = '#d4af37'; e.currentTarget.style.boxShadow = '0 0 0 2px #d4af3730' }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none' }}
+                />
+              </div>
+            </div>
+
+            {/* d. Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  className="w-full rounded-xl pl-9 pr-10 py-3 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 transition-all"
+                  style={{
+                    backgroundColor: '#0d1424',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = '#d4af37'; e.currentTarget.style.boxShadow = '0 0 0 2px #d4af3730' }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {/* e. Forgot Password */}
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-medium transition-colors hover:opacity-80"
+                style={{ color: '#d4af37' }}
+              >
+                Forgot Password?
               </Link>
             </div>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-9 pr-9 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
 
-          {/* Remember me */}
-          <div className="flex items-center justify-between text-xs pt-1">
-            <label className="flex items-center space-x-2 text-slate-400 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-3.5 h-3.5 rounded bg-slate-950 border-slate-800 text-amber-500 focus:ring-0"
-              />
-              <span>Remember login session</span>
-            </label>
-          </div>
+            {/* f. Sign In button */}
+            <button
+              type="submit"
+              disabled={loading || googleLoading}
+              className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-black transition-all disabled:opacity-60 hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg, #d4af37, #f5d47a)' }}
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Signing In…
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </form>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md disabled:opacity-50"
-          >
-            {isLoading ? 'Signing in...' : 'Sign In to Account'}
-          </button>
-        </form>
-
-        {/* Alternate OTP Links */}
-        <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-800 text-center">
-          <Link
-            to="/email-otp"
-            className="py-1.5 px-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-[11px] font-medium text-amber-400 transition-colors"
-          >
-            Email OTP Login
-          </Link>
-          <Link
-            to="/phone-otp"
-            className="py-1.5 px-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-[11px] font-medium text-amber-400 transition-colors flex items-center justify-center space-x-1"
-          >
-            <Smartphone className="w-3 h-3" />
-            <span>SMS OTP Login</span>
-          </Link>
+          {/* g. Sign Up link */}
+          <p className="mt-6 text-center text-sm text-gray-400">
+            Don't have an account?{' '}
+            <Link
+              to="/register"
+              className="font-semibold hover:opacity-80 transition-colors"
+              style={{ color: '#d4af37' }}
+            >
+              Sign Up
+            </Link>
+          </p>
         </div>
-
-        {/* Footer */}
-        <div className="text-center mt-5 text-xs text-slate-400">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-amber-400 hover:underline font-semibold">
-            Create an Account
-          </Link>
-        </div>
-
       </div>
     </div>
-  );
-};
+  )
+}
+
+export default LoginPage

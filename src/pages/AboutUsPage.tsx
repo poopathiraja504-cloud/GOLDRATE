@@ -48,3 +48,4 @@ export const AboutUsPage: React.FC = () => {
     </div>
   );
 };
+

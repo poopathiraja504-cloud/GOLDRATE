@@ -3,18 +3,18 @@ import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Coins, 
-  CircleDot, 
-  LineChart, 
-  Smartphone 
+  CircleDollarSign, 
+  ChartNoAxesCombined, 
+  User 
 } from 'lucide-react';
 
 export const MobileBottomNav: React.FC = () => {
   const tabs = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Gold', path: '/gold-rate', icon: Coins, highlight: 'gold' },
-    { label: 'Silver', path: '/silver-rate', icon: CircleDot, highlight: 'silver' },
-    { label: 'Charts', path: '/charts', icon: LineChart },
-    { label: 'Get APK', path: '/download-apk', icon: Smartphone, highlight: 'apk' },
+    { label: 'Silver', path: '/silver-rate', icon: CircleDollarSign, highlight: 'silver' },
+    { label: 'Charts', path: '/live-charts', icon: ChartNoAxesCombined },
+    { label: 'Profile', path: '/profile', icon: User },
   ];
 
   return (
@@ -37,8 +37,7 @@ export const MobileBottomNav: React.FC = () => {
               <div className="relative">
                 <Icon className={`w-5 h-5 mb-1 ${
                   tab.highlight === 'gold' ? 'text-amber-400' :
-                  tab.highlight === 'silver' ? 'text-slate-300' :
-                  tab.highlight === 'apk' ? 'text-amber-300' : ''
+                  tab.highlight === 'silver' ? 'text-slate-300' : ''
                 }`} />
               </div>
               <span className="truncate max-w-[64px]">{tab.label}</span>
@@ -49,3 +48,5 @@ export const MobileBottomNav: React.FC = () => {
     </nav>
   );
 };
+
+export default MobileBottomNav;

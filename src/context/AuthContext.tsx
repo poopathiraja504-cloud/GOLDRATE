@@ -14,8 +14,7 @@ interface AuthContextType {
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
   sendEmailOtp: (email: string) => Promise<{ error: AuthError | null }>;
   verifyEmailOtp: (email: string, token: string) => Promise<{ error: AuthError | null }>;
-  sendPhoneOtp: (phone: string) => Promise<{ error: AuthError | null }>;
-  verifyPhoneOtp: (phone: string, token: string) => Promise<{ error: AuthError | null }>;
+
   resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>;
   updateUserPassword: (password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
@@ -235,8 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Verify Email OTP
-  const verifyEmailOtp = async (email: string, token: string) => {
-    if (!isSupabaseConfigured) {
+  const verifyEmailOtp = async (email: string, token: string) => {    if (!isSupabaseConfigured) {
       if (token === '123456' || token.length === 6) {
         return signInWithEmail(email, 'demo-otp-pass');
       }
@@ -246,64 +244,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       token,
       type: 'email',
-    });
-    if (data.user) {
-      setUser(data.user);
-      await fetchProfile(data.user.id, data.user.email);
-    }
-    return { error };
-  };
-
-  // Phone SMS OTP (+91 India)
-  const sendPhoneOtp = async (phone: string) => {
-    // Ensure +91 prefix
-    const formattedPhone = phone.startsWith('+') ? phone : `+91${phone.replace(/\D/g, '')}`;
-    if (!isSupabaseConfigured) {
-      console.log(`[Dev Mode] 6-digit SMS OTP sent to ${formattedPhone}: 654321`);
-      return { error: null };
-    }
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: formattedPhone,
-    });
-    return { error };
-  };
-
-  // Verify Phone SMS OTP
-  const verifyPhoneOtp = async (phone: string, token: string) => {
-    const formattedPhone = phone.startsWith('+') ? phone : `+91${phone.replace(/\D/g, '')}`;
-    if (!isSupabaseConfigured) {
-      if (token === '654321' || token.length === 6) {
-        const mockU: User = {
-          id: 'phone-user-' + Date.now(),
-          phone: formattedPhone,
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-          app_metadata: {},
-          user_metadata: { full_name: 'Mobile Investor' },
-        };
-        const mockProf: UserProfile = {
-          id: mockU.id,
-          phone: formattedPhone,
-          full_name: 'Mobile Investor',
-          preferred_currency: 'INR',
-          preferred_city: 'National',
-          preferred_unit: '10g',
-          theme_preference: 'navy-gold',
-          sms_notifications_enabled: true,
-          email_notifications_enabled: false,
-        };
-        localStorage.setItem(MOCK_USER_STORAGE_KEY, JSON.stringify({ user: mockU, profile: mockProf }));
-        setUser(mockU);
-        setProfile(mockProf);
-        return { error: null };
-      }
-      return { error: { message: 'Invalid SMS OTP. For demo mode enter 654321' } as AuthError };
-    }
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone: formattedPhone,
-      token,
-      type: 'sms',
     });
     if (data.user) {
       setUser(data.user);
@@ -380,8 +320,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUpWithEmail,
         sendEmailOtp,
         verifyEmailOtp,
-        sendPhoneOtp,
-        verifyPhoneOtp,
         resetPasswordForEmail,
         updateUserPassword,
         signOut,
@@ -400,3 +338,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

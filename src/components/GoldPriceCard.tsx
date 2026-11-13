@@ -138,3 +138,4 @@ export const GoldPriceCard: React.FC<GoldPriceCardProps> = ({ rate, onAlertClick
     </div>
   );
 };
+

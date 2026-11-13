@@ -122,3 +122,59 @@ export interface MarketStatus {
   sourcePrimary: string;
   lastSync: string;
 }
+
+// --- Phase 2 Types ---
+
+export type MetalSymbol = 'XAU' | 'XAG' | 'XCU' | 'XAL' | 'XPT' | 'XPD';
+
+export interface MetalRate {
+  id?: string;
+  symbol: MetalSymbol;
+  name: string;
+  price_inr: number;
+  price_usd: number;
+  price_per_gram_inr: number;
+  price_per_10g_inr: number;
+  price_per_kg_inr: number;
+  price_per_tonne_inr: number;
+  change_24h: number;
+  change_percent_24h: number;
+  last_updated: string;
+  source: string;
+}
+
+export interface PushSubscription {
+  id?: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  created_at?: string;
+}
+
+export interface NotificationPreference {
+  id?: string;
+  user_id: string;
+  gold_daily: boolean;
+  silver_daily: boolean;
+  copper_daily: boolean;
+  aluminium_daily: boolean;
+  platinum_daily: boolean;
+  price_alerts_enabled: boolean;
+  alert_time: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type Currency = 'INR' | 'USD' | 'EUR';
+
+export interface PriceAlert {
+  id?: string;
+  user_id: string;
+  metal: MetalSymbol | MetalType;
+  target_price: number;
+  condition: 'above' | 'below';
+  is_active: boolean;
+  created_at?: string;
+}
+

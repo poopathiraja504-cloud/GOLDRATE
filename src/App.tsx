@@ -12,7 +12,6 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { GoogleCallbackPage } from './pages/GoogleCallbackPage';
 import { EmailOtpPage } from './pages/EmailOtpPage';
-import { PhoneOtpPage } from './pages/PhoneOtpPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -31,6 +30,14 @@ import { ContactUsPage } from './pages/ContactUsPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsConditionsPage } from './pages/TermsConditionsPage';
 
+// Phase 2 Metals & Features Pages
+import { CopperRatesPage } from './pages/CopperRatesPage';
+import { AluminiumRatesPage } from './pages/AluminiumRatesPage';
+import { PlatinumPalladiumPage } from './pages/PlatinumPalladiumPage';
+import { PriceAlertsPage } from './pages/PriceAlertsPage';
+import { DailyReportsPage } from './pages/DailyReportsPage';
+import { LiveMarketChartsPage } from './pages/LiveMarketChartsPage';
+
 export function App() {
   useEffect(() => {
     // Initialize Capacitor native handlers (Android status bar, splash screen, back button)
@@ -48,24 +55,38 @@ export function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/auth/callback" element={<GoogleCallbackPage />} />
               <Route path="/email-otp" element={<EmailOtpPage />} />
-              <Route path="/phone-otp" element={<PhoneOtpPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              
+              {/* Core Dashboard & Metals */}
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/gold-rate" element={<GoldRatePage />} />
               <Route path="/silver-rate" element={<SilverRatePage />} />
+              <Route path="/copper-rates" element={<CopperRatesPage />} />
+              <Route path="/aluminium-rates" element={<AluminiumRatesPage />} />
+              <Route path="/platinum-palladium" element={<PlatinumPalladiumPage />} />
+              
+              {/* Markets, Charts & Alerts */}
               <Route path="/live-market" element={<LiveMarketPage />} />
               <Route path="/charts" element={<PriceChartsPage />} />
+              <Route path="/live-charts" element={<LiveMarketChartsPage />} />
+              <Route path="/price-alerts" element={<PriceAlertsPage />} />
+              <Route path="/daily-reports" element={<DailyReportsPage />} />
+              
+              {/* User Account & History */}
               <Route path="/history" element={<RateHistoryPage />} />
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              
+              {/* Mobile App & Static */}
               <Route path="/download-apk" element={<DownloadApkPage />} />
               <Route path="/about-us" element={<AboutUsPage />} />
               <Route path="/contact-us" element={<ContactUsPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/terms-and-conditions" element={<TermsConditionsPage />} />
+              
               {/* Fallback route */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

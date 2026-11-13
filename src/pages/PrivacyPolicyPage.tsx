@@ -48,3 +48,4 @@ export const PrivacyPolicyPage: React.FC = () => {
     </div>
   );
 };
+

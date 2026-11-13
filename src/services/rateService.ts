@@ -398,3 +398,4 @@ export function formatINR(amount: number, showDecimals: boolean = true): string 
   });
   return `₹${formatted}`;
 }
+

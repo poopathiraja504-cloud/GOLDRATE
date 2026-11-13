@@ -46,3 +46,4 @@ export const TermsConditionsPage: React.FC = () => {
     </div>
   );
 };
+

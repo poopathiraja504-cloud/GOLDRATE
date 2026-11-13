@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useRates } from '../context/RatesContext';
 import { useAuth } from '../context/AuthContext';
-import { SupportedCity, WeightUnit } from '../types';
+import { SupportedCity, WeightUnit, Currency } from '../types';
 
 const CITIES: SupportedCity[] = [
   'National',
@@ -39,6 +39,8 @@ export const Navbar: React.FC = () => {
     setSelectedCity, 
     selectedUnit, 
     setSelectedUnit, 
+    currency,
+    setCurrency,
     connectionStatus, 
     isSyncing, 
     refreshRates, 
@@ -71,7 +73,7 @@ export const Navbar: React.FC = () => {
                 <span className="font-bold text-lg sm:text-xl tracking-tight text-slate-300">SILVER</span>
               </div>
               <p className="text-[10px] uppercase tracking-wider text-slate-400 font-medium hidden sm:block">
-                Live Indian Bullion Rates
+                Live Multi-Metals Bullion Platform
               </p>
             </div>
           </Link>
@@ -146,8 +148,32 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Actions: Refresh, Notifications, Theme, Profile */}
+        {/* Right Actions: Currency Toggle, Refresh, Notifications, Theme, Profile */}
         <div className="flex items-center space-x-2">
+          {/* Currency Switcher */}
+          <div className="flex items-center bg-slate-900/90 border border-slate-800 rounded-lg p-0.5 text-xs">
+            <button
+              onClick={() => setCurrency('INR')}
+              className={`px-2 py-1 rounded text-xs font-bold transition-all ${
+                currency === 'INR'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              ₹ INR
+            </button>
+            <button
+              onClick={() => setCurrency('USD')}
+              className={`px-2 py-1 rounded text-xs font-bold transition-all ${
+                currency === 'USD'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              $ USD
+            </button>
+          </div>
+
           {/* Refresh Button */}
           <button
             onClick={() => refreshRates()}
@@ -181,41 +207,37 @@ export const Navbar: React.FC = () => {
                 <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                   <div className="flex items-center space-x-2">
                     <Bell className="w-4 h-4 text-amber-400" />
-                    <h3 className="font-semibold text-sm text-slate-100">Market Alerts & Notifications</h3>
+                    <span className="font-semibold text-sm text-slate-100">Notifications</span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    {notifications.length > 0 && (
-                      <button 
-                        onClick={clearNotifications}
-                        className="text-[11px] text-slate-400 hover:text-amber-400 mr-2"
-                      >
-                        Clear all
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => setShowNotifMenu(false)}
-                      className="text-slate-400 hover:text-slate-200"
+                  {notifications.length > 0 && (
+                    <button
+                      onClick={clearNotifications}
+                      className="text-xs text-slate-400 hover:text-slate-200"
                     >
-                      <X className="w-4 h-4" />
+                      Clear all
                     </button>
-                  </div>
+                  )}
                 </div>
 
-                <div className="divide-y divide-slate-800/60 max-h-72 overflow-y-auto mt-2">
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-800/60 my-2 pr-1">
                   {notifications.length === 0 ? (
-                    <p className="py-6 text-center text-xs text-slate-500">No new alerts at this time.</p>
+                    <div className="py-6 text-center text-xs text-slate-400">
+                      No new notifications right now.
+                    </div>
                   ) : (
                     notifications.map((n) => (
-                      <div 
-                        key={n.id} 
+                      <div
+                        key={n.id}
                         onClick={() => markNotificationAsRead(n.id)}
                         className={`py-2.5 px-2 rounded-lg cursor-pointer transition-colors ${
-                          n.is_read ? 'opacity-60 hover:bg-slate-800/30' : 'bg-slate-800/40 hover:bg-slate-800/70'
+                          n.is_read ? 'opacity-70 hover:bg-slate-800/30' : 'bg-slate-800/40 hover:bg-slate-800/60'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-amber-400">{n.title}</span>
-                          {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                          <span className="text-xs font-semibold text-amber-300">{n.title}</span>
+                          {!n.is_read && (
+                            <span className="w-2 h-2 rounded-full bg-amber-400" />
+                          )}
                         </div>
                         <p className="text-xs text-slate-300 mt-1 leading-relaxed">{n.message}</p>
                         <span className="text-[10px] text-slate-500 mt-1 block">
@@ -281,3 +303,5 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
+
+export default Navbar;

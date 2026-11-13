@@ -172,3 +172,4 @@ export const SilverRatePage: React.FC = () => {
     </div>
   );
 };
+

@@ -122,3 +122,4 @@ export const RateHistoryPage: React.FC = () => {
     </div>
   );
 };
+

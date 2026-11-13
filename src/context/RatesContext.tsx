@@ -1,13 +1,29 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { GoldRate, SilverRate, SupportedCity, WeightUnit, Carat, UserFavorite, UserNotification, UserPriceAlert } from '../types';
+import { GoldRate, SilverRate, SupportedCity, WeightUnit, Carat, UserFavorite, UserNotification, UserPriceAlert, Currency } from '../types';
 import { fetchLiveRates } from '../services/rateService';
 import { subscribeToNetworkChanges } from '../lib/capacitor';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
+export interface MetalBenchmark {
+  perGram: number;
+  perKg?: number;
+  per10g?: number;
+  perTonne?: number;
+  change: number;
+}
+
 interface RatesContextType {
   goldRates: Record<Carat, GoldRate> | null;
   silverRate: SilverRate | null;
+  copperRate: MetalBenchmark;
+  aluminiumRate: MetalBenchmark;
+  platinumRate: MetalBenchmark;
+  palladiumRate: MetalBenchmark;
+  currency: Currency;
+  setCurrency: (c: Currency) => void;
+  convertPrice: (inrAmount: number) => number;
+  formatPrice: (inrAmount: number) => string;
   selectedCity: SupportedCity;
   setSelectedCity: (city: SupportedCity) => void;
   selectedUnit: WeightUnit;
@@ -38,6 +54,7 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const { user } = useAuth();
   const [selectedCity, setSelectedCity] = useState<SupportedCity>('National');
   const [selectedUnit, setSelectedUnit] = useState<WeightUnit>('10g');
+  const [currency, setCurrency] = useState<Currency>('INR');
   const [goldRates, setGoldRates] = useState<Record<Carat, GoldRate> | null>(null);
   const [silverRate, setSilverRate] = useState<SilverRate | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -48,14 +65,59 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
+  // Industrial & Precious Metals benchmarks (INR base)
+  const [copperRate, setCopperRate] = useState<MetalBenchmark>({
+    perGram: 0.72,
+    perKg: 720,
+    perTonne: 720000,
+    change: 0.34,
+  });
+
+  const [aluminiumRate, setAluminiumRate] = useState<MetalBenchmark>({
+    perGram: 0.22,
+    perKg: 220,
+    perTonne: 220000,
+    change: -0.18,
+  });
+
+  const [platinumRate, setPlatinumRate] = useState<MetalBenchmark>({
+    perGram: 2850,
+    per10g: 28500,
+    change: 0.85,
+  });
+
+  const [palladiumRate, setPalladiumRate] = useState<MetalBenchmark>({
+    perGram: 2980,
+    per10g: 29800,
+    change: -0.42,
+  });
+
+  // USD to INR conversion factor
+  const USD_INR_RATE = 84.45;
+
+  const convertPrice = useCallback((inrAmount: number): number => {
+    if (currency === 'USD') {
+      return Math.round((inrAmount / USD_INR_RATE) * 100) / 100;
+    }
+    return inrAmount;
+  }, [currency]);
+
+  const formatPrice = useCallback((inrAmount: number): string => {
+    const converted = convertPrice(inrAmount);
+    if (currency === 'USD') {
+      return `$${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `₹${converted.toLocaleString('en-IN', { minimumFractionDigits: converted % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2 })}`;
+  }, [currency, convertPrice]);
+
   // Favorites & Alerts
   const [favorites, setFavorites] = useState<UserFavorite[]>([]);
   const [notifications, setNotifications] = useState<UserNotification[]>([
     {
       id: 'notif-1',
       user_id: 'system',
-      title: 'Bullion Market Opening',
-      message: 'MCX & International bullion markets are active. Today 24K Gold opened at ₹7,850/g (+0.58%).',
+      title: 'Bullion Market Active',
+      message: 'MCX & International bullion markets are active. 24K Gold opened at ₹7,850/g (+0.58%).',
       metal: 'gold',
       notification_type: 'market_update',
       is_read: false,
@@ -64,8 +126,8 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     {
       id: 'notif-2',
       user_id: 'system',
-      title: 'Silver Crosses ₹94/g',
-      message: 'Silver 99.9% spot rate moved +₹0.80/g today, trading near ₹94,500/kg.',
+      title: 'Silver Spot Benchmark',
+      message: 'Silver 99.9% spot rate moved +0.85% today, trading near ₹94,500/kg.',
       metal: 'silver',
       notification_type: 'rate_alert',
       is_read: false,
@@ -118,12 +180,10 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
-  // Initial and city change load
   useEffect(() => {
     loadRates(selectedCity, !goldRates);
   }, [selectedCity, loadRates]);
 
-  // Periodic automatic refresh every 60 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible' && isOnline) {
@@ -137,7 +197,6 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await loadRates(selectedCity, true);
   };
 
-  // Connection status computation
   const connectionStatus = !isOnline
     ? 'offline'
     : isSyncing
@@ -210,7 +269,6 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  // Notifications
   const markNotificationAsRead = (id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
@@ -221,7 +279,6 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setNotifications([]);
   };
 
-  // Price Alerts
   const addPriceAlert = async (
     metal: 'gold' | 'silver',
     targetRate: number,
@@ -256,7 +313,6 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
 
-    // Add immediate confirmation notification
     setNotifications((prev) => [
       {
         id: 'notif-alert-' + Date.now(),
@@ -290,6 +346,14 @@ export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         goldRates,
         silverRate,
+        copperRate,
+        aluminiumRate,
+        platinumRate,
+        palladiumRate,
+        currency,
+        setCurrency,
+        convertPrice,
+        formatPrice,
         selectedCity,
         setSelectedCity,
         selectedUnit,
@@ -326,3 +390,5 @@ export const useRates = () => {
   }
   return context;
 };
+
+export default RatesContext;

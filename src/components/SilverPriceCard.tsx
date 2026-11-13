@@ -146,3 +146,4 @@ export const SilverPriceCard: React.FC<SilverPriceCardProps> = ({ rate, onAlertC
     </div>
   );
 };
+

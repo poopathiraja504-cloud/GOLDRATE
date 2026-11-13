@@ -244,3 +244,4 @@ export const JewelleryCalculator: React.FC = () => {
     </div>
   );
 };
+

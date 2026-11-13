@@ -319,3 +319,99 @@ VALUES
 ('tax_rules', '{"gst_percentage": 3.0, "hallmarking_fee": 45.0, "typical_making_charges_percent": 12.0}'::jsonb),
 ('supported_cities', '["National", "Mumbai", "Delhi", "Chennai", "Bangalore", "Kolkata", "Hyderabad", "Ahmedabad", "Jaipur", "Pune", "Lucknow"]'::jsonb)
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+
+
+
+-- ====================================================================
+-- PHASE 2 EXTENSIONS: MULTI-METALS & WEB PUSH NOTIFICATIONS
+-- ====================================================================
+
+-- 11. GENERIC METAL RATES TABLE (8 Commodities)
+CREATE TABLE IF NOT EXISTS public.metal_rates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    symbol TEXT NOT NULL CHECK (symbol IN ('XAU', 'XAG', 'XCU', 'XAL', 'XPT', 'XPD')),
+    name TEXT NOT NULL,
+    price_inr NUMERIC(14, 2) NOT NULL,
+    price_usd NUMERIC(14, 2),
+    price_per_gram_inr NUMERIC(12, 2),
+    price_per_10g_inr NUMERIC(12, 2),
+    price_per_kg_inr NUMERIC(12, 2),
+    price_per_tonne_inr NUMERIC(14, 2),
+    change_24h NUMERIC(10, 2) DEFAULT 0.0,
+    change_percent_24h NUMERIC(5, 2) DEFAULT 0.0,
+    last_updated TIMESTAMPTZ DEFAULT NOW(),
+    source TEXT DEFAULT 'LBMA / LME / MCX Reference Spot'
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_metal_rates_symbol ON public.metal_rates(symbol);
+
+-- 12. WEB PUSH SUBSCRIPTIONS TABLE
+CREATE TABLE IF NOT EXISTS public.push_subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    endpoint TEXT NOT NULL UNIQUE,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_push_user ON public.push_subscriptions(user_id);
+
+-- 13. USER NOTIFICATION PREFERENCES TABLE
+CREATE TABLE IF NOT EXISTS public.notification_preferences (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+    gold_daily BOOLEAN DEFAULT TRUE,
+    silver_daily BOOLEAN DEFAULT TRUE,
+    copper_daily BOOLEAN DEFAULT FALSE,
+    aluminium_daily BOOLEAN DEFAULT FALSE,
+    platinum_daily BOOLEAN DEFAULT FALSE,
+    price_alerts_enabled BOOLEAN DEFAULT TRUE,
+    alert_time TEXT DEFAULT '09:00',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS on Phase 2 tables
+ALTER TABLE public.metal_rates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notification_preferences ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Metal rates are publicly readable"
+    ON public.metal_rates FOR SELECT
+    USING (true);
+
+CREATE POLICY "Service role can manage metal rates"
+    ON public.metal_rates FOR ALL
+    TO service_role
+    USING (true);
+
+CREATE POLICY "Users can manage own push subscriptions"
+    ON public.push_subscriptions FOR ALL
+    USING (auth.uid() = user_id OR user_id IS NULL)
+    WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
+
+CREATE POLICY "Users can manage own notification preferences"
+    ON public.notification_preferences FOR ALL
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+-- Seed Phase 2 metal benchmarks
+INSERT INTO public.metal_rates (symbol, name, price_inr, price_usd, price_per_gram_inr, price_per_10g_inr, price_per_kg_inr, price_per_tonne_inr, change_24h, change_percent_24h, source)
+VALUES
+('XAU', 'Gold 24K', 78500.00, 930.00, 7850.00, 78500.00, 7850000.00, NULL, 45.00, 0.58, 'IBJA / LBMA Benchmark'),
+('XAG', 'Silver 99.9%', 94500.00, 1120.00, 94.50, 945.00, 94500.00, NULL, 800.00, 0.85, 'LBMA Fine Silver'),
+('XCU', 'Copper', 720000.00, 8525.00, 0.72, 7.20, 720.00, 720000.00, 2.50, 0.34, 'LME Primary Copper Grade A'),
+('XAL', 'Aluminium', 220000.00, 2605.00, 0.22, 2.20, 220.00, 220000.00, -0.40, -0.18, 'LME High Grade Aluminium'),
+('XPT', 'Platinum', 28500.00, 337.50, 2850.00, 28500.00, 2850000.00, NULL, 24.00, 0.85, 'LPPM Platinum 999.5'),
+('XPD', 'Palladium', 29800.00, 352.80, 2980.00, 29800.00, 2980000.00, NULL, -12.50, -0.42, 'LPPM Palladium 999.5')
+ON CONFLICT (symbol) DO UPDATE SET
+    price_inr = EXCLUDED.price_inr,
+    price_usd = EXCLUDED.price_usd,
+    price_per_gram_inr = EXCLUDED.price_per_gram_inr,
+    price_per_10g_inr = EXCLUDED.price_per_10g_inr,
+    price_per_kg_inr = EXCLUDED.price_per_kg_inr,
+    price_per_tonne_inr = EXCLUDED.price_per_tonne_inr,
+    change_24h = EXCLUDED.change_24h,
+    change_percent_24h = EXCLUDED.change_percent_24h,
+    last_updated = NOW();

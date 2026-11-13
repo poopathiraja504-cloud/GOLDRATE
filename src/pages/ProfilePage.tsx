@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { User, Mail, Phone, MapPin, Scale, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { User, Mail, MapPin, Scale, ShieldCheck, CheckCircle2, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRates } from '../context/RatesContext';
-import { SupportedCity, WeightUnit } from '../types';
+import { SupportedCity, WeightUnit, Currency } from '../types';
 
 const CITIES: SupportedCity[] = [
   'National',
@@ -22,12 +22,12 @@ const UNITS: WeightUnit[] = ['1g', '8g', '10g', '100g', '1kg'];
 
 export const ProfilePage: React.FC = () => {
   const { user, profile, updateProfile } = useAuth();
-  const { setSelectedCity, setSelectedUnit } = useRates();
+  const { setSelectedCity, setSelectedUnit, currency, setCurrency } = useRates();
 
   const [fullName, setFullName] = useState(profile?.full_name || '');
-  const [phone, setPhone] = useState(profile?.phone || '');
   const [preferredCity, setPreferredCity] = useState<SupportedCity>((profile?.preferred_city as SupportedCity) || 'National');
   const [preferredUnit, setPreferredUnit] = useState<WeightUnit>(profile?.preferred_unit || '10g');
+  const [preferredCurrency, setPreferredCurrency] = useState<Currency>(currency);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -38,14 +38,15 @@ export const ProfilePage: React.FC = () => {
 
     const ok = await updateProfile({
       full_name: fullName,
-      phone,
       preferred_city: preferredCity,
       preferred_unit: preferredUnit,
+      preferred_currency: preferredCurrency,
     });
 
     if (ok) {
       setSelectedCity(preferredCity);
       setSelectedUnit(preferredUnit);
+      setCurrency(preferredCurrency);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 2500);
     }
@@ -60,7 +61,7 @@ export const ProfilePage: React.FC = () => {
           Investor Profile & Preferences
         </h1>
         <p className="text-xs text-slate-400 mt-1">
-          Customize your default bullion city benchmark, primary weight units, and communication preferences.
+          Customize your default bullion city benchmark, primary weight units, and display currency.
         </p>
       </div>
 
@@ -121,18 +122,24 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Phone Number */}
+        {/* Preferred Currency */}
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Mobile Number (+91)</label>
-          <div className="relative">
-            <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 98765 43210"
-              className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500"
-            />
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">Preferred Display Currency</label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setPreferredCurrency('INR')}
+              className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all border ${preferredCurrency === 'INR' ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}`}
+            >
+              ₹ INR (Indian Rupee)
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreferredCurrency('USD')}
+              className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all border ${preferredCurrency === 'USD' ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}`}
+            >
+              $ USD (United States Dollar)
+            </button>
           </div>
         </div>
 
@@ -196,3 +203,5 @@ export const ProfilePage: React.FC = () => {
     </div>
   );
 };
+
+export default ProfilePage;

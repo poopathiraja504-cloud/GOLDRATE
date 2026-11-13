@@ -148,3 +148,4 @@ export const DownloadApkPage: React.FC = () => {
     </div>
   );
 };
+
