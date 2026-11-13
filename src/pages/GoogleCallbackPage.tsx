@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCw, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { emailService } from '../services/emailService';
 
 export const GoogleCallbackPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,10 +12,14 @@ export const GoogleCallbackPage: React.FC = () => {
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (session && !error) {
         setStatus('success');
-        setTimeout(() => navigate('/dashboard'), 1000);
+        if (session.user.email) {
+          const displayName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+          emailService.sendWelcomeNotification(session.user.email, displayName, false);
+        }
+        setTimeout(() => navigate('/dashboard', { replace: true }), 1000);
       } else {
         setStatus('error');
-        setTimeout(() => navigate('/login'), 2000);
+        setTimeout(() => navigate('/login', { replace: true }), 2000);
       }
     });
   }, [navigate]);
@@ -47,3 +52,4 @@ export const GoogleCallbackPage: React.FC = () => {
   );
 };
 
+export default GoogleCallbackPage;

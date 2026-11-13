@@ -3,6 +3,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 // City price differentials in INR/gram relative to National benchmark
 const CITY_VARIATIONS: Record<string, { gold: number; silver: number }> = {
+  Coimbatore: { gold: 25, silver: 3.20 }, // Coimbatore Jewellery Association benchmark
   National: { gold: 0, silver: 0 },
   Mumbai: { gold: 5, silver: 0.10 },
   Delhi: { gold: 15, silver: 0.25 },
@@ -399,3 +400,69 @@ export function formatINR(amount: number, showDecimals: boolean = true): string 
   return `₹${formatted}`;
 }
 
+
+
+// --- Market Distinction Tiers: International Spot, MCX Futures, and Coimbatore Local Retail ---
+
+export interface MarketTierData {
+  internationalSpot: {
+    goldUsdOz: number;
+    silverUsdOz: number;
+    goldInrGram: number;
+    silverInrGram: number;
+    usdInr: number;
+  };
+  mcxFutures: {
+    goldPer10g: number;
+    silverPerKg: number;
+    expiryDate: string;
+    lotSizeGold: string;
+    lotSizeSilver: string;
+  };
+  localRetail: {
+    location: string;
+    association: string;
+    gold24kPerGram: number;
+    gold22kPerGram: number;
+    gold18kPerGram: number;
+    silverPerGram: number;
+    isIndicative: boolean;
+  };
+}
+
+export function getMarketTiers(city: string = 'Coimbatore'): MarketTierData {
+  const cityOffset = CITY_VARIATIONS[city] || CITY_VARIATIONS.Coimbatore;
+  const baseGold24k = DEFAULT_GOLD_24K_PER_GRAM;
+  const baseSilver = DEFAULT_SILVER_PER_GRAM;
+  
+  const coimbatoreGold24k = baseGold24k + cityOffset.gold;
+  const coimbatoreGold22k = Math.round(coimbatoreGold24k * (22 / 24) * 100) / 100;
+  const coimbatoreGold18k = Math.round(coimbatoreGold24k * (18 / 24) * 100) / 100;
+  const coimbatoreSilver = baseSilver + cityOffset.silver;
+
+  return {
+    internationalSpot: {
+      goldUsdOz: 2735.50,
+      silverUsdOz: 32.18,
+      goldInrGram: Math.round(((2735.50 / 31.1035) * 84.45) * 100) / 100,
+      silverInrGram: Math.round(((32.18 / 31.1035) * 84.45) * 100) / 100,
+      usdInr: 84.45,
+    },
+    mcxFutures: {
+      goldPer10g: 78120.00,
+      silverPerKg: 94150.00,
+      expiryDate: 'Current Active Contract',
+      lotSizeGold: '1 kg (100g tick)',
+      lotSizeSilver: '30 kg (1kg tick)',
+    },
+    localRetail: {
+      location: city === 'Coimbatore' ? 'Coimbatore, Tamil Nadu' : `${city}, India`,
+      association: city === 'Coimbatore' ? 'The Coimbatore Jewellery Association' : `${city} Bullion Association`,
+      gold24kPerGram: coimbatoreGold24k,
+      gold22kPerGram: coimbatoreGold22k,
+      gold18kPerGram: coimbatoreGold18k,
+      silverPerGram: coimbatoreSilver,
+      isIndicative: true,
+    },
+  };
+}

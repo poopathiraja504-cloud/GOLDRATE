@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Mail, Lock, Eye, EyeOff, Coins, AlertCircle, CheckCircle, User } from 'lucide-react'
+import { emailService } from '../services/emailService'
 
 function getPasswordStrength(password: string): { score: number; label: string; color: string } {
   let score = 0
@@ -49,6 +50,7 @@ export const RegisterPage: React.FC = () => {
       if (authError) {
         setError(authError.message || 'Registration failed. Please try again.')
       } else {
+        emailService.sendWelcomeNotification(email, fullName.trim(), true);
         setSuccess(true)
       }
     } catch (e) {

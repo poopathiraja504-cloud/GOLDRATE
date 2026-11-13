@@ -13,7 +13,8 @@ import {
   BellRing, 
   Settings, 
   User, 
-  LogOut 
+  LogOut,
+  Newspaper 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRates } from '../context/RatesContext';
@@ -37,6 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCloseMobile }) => {
     { label: 'Aluminium Rates', path: '/aluminium-rates', icon: Layers, color: 'text-slate-400' },
     { label: 'Platinum & Palladium', path: '/platinum-palladium', icon: Gem, color: 'text-blue-300' },
     { label: 'Live Market Charts', path: '/live-charts', icon: ChartNoAxesCombined },
+    { label: 'Market News', path: '/news', icon: Newspaper, color: 'text-emerald-400' },
     { label: 'Price Alerts', path: '/price-alerts', icon: Bell },
     { label: 'Daily Reports', path: '/daily-reports', icon: FileText },
     { label: 'Notifications', path: '/notifications', icon: BellRing, badge: unreadNotifCount > 0 ? unreadNotifCount : undefined },

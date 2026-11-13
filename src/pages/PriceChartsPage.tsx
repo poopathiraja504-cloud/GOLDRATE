@@ -1,5 +1,6 @@
 import React from 'react';
 import { LineChart, Sparkles } from 'lucide-react';
+import { TradingViewCandlestickChart } from '../components/TradingViewCandlestickChart';
 import { InteractiveChart } from '../components/InteractiveChart';
 
 export const PriceChartsPage: React.FC = () => {
@@ -15,17 +16,17 @@ export const PriceChartsPage: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time interactive area charts powered by Recharts with Intraday, 7D, 30D, 6M, and 1Y historical trajectories.
+            TradingView Candlestick Engine & Area Charts across 1D, 1W, 1M, 1Y, 3Y, and 5Y historical trajectories.
           </p>
         </div>
       </div>
 
-      {/* Main Full-Size Chart */}
-      <InteractiveChart initialMetal="gold" initialTimeframe="30d" />
+      {/* Main TradingView Candlestick Chart */}
+      <TradingViewCandlestickChart initialMetal="gold" initialPeriod="1M" height={440} />
 
-      {/* Secondary Chart: Silver 6-Month Comparison */}
+      {/* Secondary Multi-Month Trajectory */}
       <div className="pt-4">
-        <h2 className="text-lg font-bold text-white mb-3">Silver Bullion Multi-Month Trajectory</h2>
+        <h2 className="text-lg font-bold text-white mb-3">Multi-Month Area Trend Trajectory</h2>
         <InteractiveChart initialMetal="silver" initialTimeframe="6m" />
       </div>
 
@@ -33,3 +34,4 @@ export const PriceChartsPage: React.FC = () => {
   );
 };
 
+export default PriceChartsPage;

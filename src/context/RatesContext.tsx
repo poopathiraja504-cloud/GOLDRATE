@@ -52,7 +52,7 @@ const RatesContext = createContext<RatesContextType | undefined>(undefined);
 
 export const RatesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [selectedCity, setSelectedCity] = useState<SupportedCity>('National');
+  const [selectedCity, setSelectedCity] = useState<SupportedCity>('Coimbatore');
   const [selectedUnit, setSelectedUnit] = useState<WeightUnit>('10g');
   const [currency, setCurrency] = useState<Currency>('INR');
   const [goldRates, setGoldRates] = useState<Record<Carat, GoldRate> | null>(null);

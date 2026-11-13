@@ -5,6 +5,7 @@ import { useRates } from '../context/RatesContext';
 import { SupportedCity, WeightUnit, Currency } from '../types';
 
 const CITIES: SupportedCity[] = [
+  'Coimbatore',
   'National',
   'Mumbai',
   'Delhi',

@@ -5,6 +5,7 @@ export type MetalType = 'gold' | 'silver';
 export type WeightUnit = '1g' | '8g' | '10g' | '100g' | '1kg';
 
 export type SupportedCity = 
+  | 'Coimbatore'
   | 'National'
   | 'Mumbai'
   | 'Delhi'

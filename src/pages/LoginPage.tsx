@@ -1,57 +1,64 @@
-import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { Mail, Lock, Eye, EyeOff, Coins, AlertCircle } from 'lucide-react'
+import React, { useState } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Mail, Lock, Eye, EyeOff, Coins, AlertCircle } from 'lucide-react';
+import { emailService } from '../services/emailService';
 
 export const LoginPage: React.FC = () => {
-  const navigate = useNavigate()
-  const { signInWithGoogle, signInWithEmail } = useAuth()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { signInWithGoogle, signInWithEmail } = useAuth();
 
-  const [email, setEmail] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
-  const [showPassword, setShowPassword] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [googleLoading, setGoogleLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string>('')
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [rememberMe, setRememberMe] = useState<boolean>(true);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [googleLoading, setGoogleLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
+  const redirectTarget = (location.state as any)?.from?.pathname || '/dashboard';
 
   const handleGoogle = async () => {
-    setError('')
-    setGoogleLoading(true)
+    setError('');
+    setGoogleLoading(true);
     try {
-      const { error: authError } = await signInWithGoogle()
+      const { error: authError } = await signInWithGoogle();
       if (authError) {
-        setError(authError.message || 'Google sign-in failed. Please try again.')
+        setError(authError.message || 'Google sign-in failed. Please try again.');
       } else {
-        navigate('/auth/callback')
+        navigate('/auth/callback');
       }
-    } catch (e) {
-      setError('Google sign-in failed. Please try again.')
+    } catch {
+      setError('Google sign-in failed. Please try again.');
     } finally {
-      setGoogleLoading(false)
+      setGoogleLoading(false);
     }
-  }
+  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!email || !password) {
-      setError('Please enter your email and password.')
-      return
+      setError('Please enter your email and password.');
+      return;
     }
-    setError('')
-    setLoading(true)
+    setError('');
+    setLoading(true);
     try {
-      const { error: authError } = await signInWithEmail(email, password)
+      const { error: authError } = await signInWithEmail(email, password);
       if (authError) {
-        setError(authError.message || 'Sign-in failed. Please check your credentials.')
+        setError(authError.message || 'Sign-in failed. Please check your credentials.');
       } else {
-        navigate('/dashboard')
+        // Send welcome back email (rate-limited)
+        emailService.sendWelcomeNotification(email, email.split('@')[0], false);
+        navigate(redirectTarget, { replace: true });
       }
-    } catch (e) {
-      setError('Sign-in failed. Please try again.')
+    } catch {
+      setError('Sign-in failed. Please try again.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: '#0a0f1e' }}>
@@ -76,7 +83,7 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
-          {/* a. Continue with Google */}
+          {/* 1. Continue with Google */}
           <button
             type="button"
             onClick={handleGoogle}
@@ -100,7 +107,7 @@ export const LoginPage: React.FC = () => {
             Continue with Google
           </button>
 
-          {/* b. OR Divider */}
+          {/* 2. OR Divider */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-white/10" />
             <span className="text-xs text-gray-500 font-medium">OR</span>
@@ -108,7 +115,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <form onSubmit={handleEmailSignIn} className="space-y-4">
-            {/* c. Email */}
+            {/* 3. Email Address */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
               <div className="relative">
@@ -119,18 +126,19 @@ export const LoginPage: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoComplete="email"
+                  required
                   className="w-full rounded-xl pl-9 pr-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 transition-all"
                   style={{
                     backgroundColor: '#0d1424',
                     border: '1px solid rgba(255,255,255,0.12)',
                   }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = '#d4af37'; e.currentTarget.style.boxShadow = '0 0 0 2px #d4af3730' }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none' }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = '#d4af37'; e.currentTarget.style.boxShadow = '0 0 0 2px #d4af3730'; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none'; }}
                 />
               </div>
             </div>
 
-            {/* d. Password */}
+            {/* 4. Password */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
               <div className="relative">
@@ -141,13 +149,14 @@ export const LoginPage: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
+                  required
                   className="w-full rounded-xl pl-9 pr-10 py-3 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 transition-all"
                   style={{
                     backgroundColor: '#0d1424',
                     border: '1px solid rgba(255,255,255,0.12)',
                   }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = '#d4af37'; e.currentTarget.style.boxShadow = '0 0 0 2px #d4af3730' }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none' }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = '#d4af37'; e.currentTarget.style.boxShadow = '0 0 0 2px #d4af3730'; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none'; }}
                 />
                 <button
                   type="button"
@@ -160,8 +169,18 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            {/* e. Forgot Password */}
-            <div className="flex justify-end">
+            {/* 5. Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between pt-1">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-400 select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded bg-[#0d1424] border-white/20 text-[#d4af37] focus:ring-0 cursor-pointer"
+                />
+                <span>Remember Me</span>
+              </label>
+
               <Link
                 to="/forgot-password"
                 className="text-xs font-medium transition-colors hover:opacity-80"
@@ -171,11 +190,11 @@ export const LoginPage: React.FC = () => {
               </Link>
             </div>
 
-            {/* f. Sign In button */}
+            {/* 6. Sign In button */}
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-black transition-all disabled:opacity-60 hover:opacity-90"
+              className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-black transition-all disabled:opacity-60 hover:opacity-90 shadow-lg"
               style={{ background: 'linear-gradient(135deg, #d4af37, #f5d47a)' }}
             >
               {loading ? (
@@ -192,7 +211,7 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
 
-          {/* g. Sign Up link */}
+          {/* 7. Sign Up link */}
           <p className="mt-6 text-center text-sm text-gray-400">
             Don't have an account?{' '}
             <Link
@@ -206,7 +225,7 @@ export const LoginPage: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;
