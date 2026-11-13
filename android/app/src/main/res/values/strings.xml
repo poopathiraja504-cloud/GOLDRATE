@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gold and Silver Rate</string>
+    <string name="title_activity_main">Gold and Silver Rate</string>
+    <string name="package_name">com.goldsilverrate.app</string>
+    <string name="custom_url_scheme">com.goldsilverrate.app</string>
+</resources>

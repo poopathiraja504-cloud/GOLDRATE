@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #070d19;
+    --bg-secondary: #0b1528;
+    --bg-card: #0f1d38;
+    --bg-card-hover: #142548;
+    --border-color: #1e3056;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --gold-primary: #eab308;
+    --gold-light: #fef08a;
+    --gold-dark: #a16207;
+    --silver-primary: #cbd5e1;
+    --silver-light: #f1f5f9;
+    --silver-dark: #64748b;
+  }
+
+  .light {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --border-color: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --gold-primary: #ca8a04;
+    --gold-light: #facc15;
+    --gold-dark: #854d0e;
+    --silver-primary: #64748b;
+    --silver-light: #94a3b8;
+    --silver-dark: #334155;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(11, 21, 40, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(234, 179, 8, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(234, 179, 8, 0.6);
+}
+
+/* Glassmorphism & Glow Effects */
+.gold-glow {
+  box-shadow: 0 0 25px -5px rgba(234, 179, 8, 0.25);
+}
+
+.silver-glow {
+  box-shadow: 0 0 25px -5px rgba(203, 213, 225, 0.2);
+}
+
+.card-gradient-gold {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.08) 0%, rgba(15, 29, 56, 0.95) 100%);
+}
+
+.card-gradient-silver {
+  background: linear-gradient(135deg, rgba(203, 213, 225, 0.08) 0%, rgba(15, 29, 56, 0.95) 100%);
+}
+
+/* Shimmer animation for live rates */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.01); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

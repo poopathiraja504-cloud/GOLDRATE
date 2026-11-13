@@ -1,0 +1,29 @@
+{
+  "short_name": "Gold & Silver",
+  "name": "Gold and Silver Live Rate Tracking Platform",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/gold-coin.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#070d19",
+  "theme_color": "#d4af37",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "description": "Real-time verified gold and silver rate tracking for Indian bullion and retail markets with 24K, 22K, 18K purity breakdowns, price alerts, and interactive charts."
+}

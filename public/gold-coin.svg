@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#a16207" />
+    </linearGradient>
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#cbd5e1" />
+      <stop offset="100%" stop-color="#64748b" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#ca8a04" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <!-- Background Glow -->
+  <circle cx="50" cy="50" r="44" fill="url(#goldGrad)" filter="url(#glow)"/>
+  <!-- Inner Ring -->
+  <circle cx="50" cy="50" r="38" fill="none" stroke="#713f12" stroke-width="2" stroke-dasharray="3,2"/>
+  <!-- Silver Accents -->
+  <circle cx="50" cy="50" r="34" fill="#070d19" />
+  <!-- Rupee Symbol & Bullion Bar Icon -->
+  <path d="M42 32 H58 M42 39 H56 M42 46 H54 C58 46 60 44 60 41 C60 38 58 37 54 37 H42 M47 46 L58 68" 
+        stroke="url(#goldGrad)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Stars -->
+  <circle cx="34" cy="50" r="2" fill="#eab308"/>
+  <circle cx="66" cy="50" r="2" fill="#e2e8f0"/>
+</svg>
